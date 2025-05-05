@@ -6,8 +6,9 @@ import { DateTime } from 'luxon';
 // Placeholder: Replace with actual API endpoint and user context
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-interface Exam {
+interface Assignment {
   assignment_id: string;
+  exam_id: string;
   title: string;
   available_at: string;
   end_at: string;
@@ -28,7 +29,7 @@ declare global {
 }
 
 const StudentPage: React.FC = () => {
-  const [exams, setExams] = useState<Exam[]>([]);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -38,58 +39,65 @@ const StudentPage: React.FC = () => {
     if (!user) return;
     setLoading(true);
     setError(null);
-    const fetchExams = async () => {
+    const fetchAssignments = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/assignments?user_id=${user.id}`);
         if (!res.ok) throw new Error('Failed to fetch exams');
         const data = await res.json();
-        setExams(data.assignments || []);
+        setAssignments(data.assignments || []);
       } catch (err: any) {
         setError(err.message || 'Unknown error');
       } finally {
         setLoading(false);
       }
     };
-    fetchExams();
+    fetchAssignments();
   }, [user]);
 
-  const getStatus = (exam: Exam) => {
+  const getStatus = (assignment: Assignment) => {
     const now = new Date();
-    const available = new Date(exam.available_at);
-    const end = new Date(exam.end_at);
+    const available = new Date(assignment.available_at);
+    const end = new Date(assignment.end_at);
     if (now < available) return 'upcoming';
     if (now >= available && now <= end) return 'active';
     return 'completed';
   };
 
-  const handleStartExam = async (examId: string) => {
-    setLoadingExamId(examId);
+  const handleStartExam = async (assignment: Assignment) => {
+    setLoadingExamId(assignment.assignment_id);
     try {
+      console.log('Attempting to start exam with:', { userId: user.id, examId: assignment.exam_id, assignmentId: assignment.assignment_id });
       const res = await fetch(`${API_BASE_URL}/api/exam/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: user.id,
-          exam_id: examId,
-          device_info: navigator.userAgent,
+          exam_id: assignment.exam_id,
         }),
       });
       const data = await res.json();
+      console.log('API response:', res);
+      console.log('API response data:', data);
       if (!res.ok) {
+        console.error('Failed to get exam token:', data);
         alert(data.error || 'Failed to get exam token');
         setLoadingExamId(null);
         return;
       }
       const token = data.token;
 
+      // Launch the Electron renderer with the token
+      window.location.href = `passport://start?token=${encodeURIComponent(token)}`;
+
       // Launch the renderer with the token
       if (window.electronAPI && window.electronAPI.launchExam) {
-        window.electronAPI.launchExam(user.id, examId, token);
+        window.electronAPI.launchExam(user.id, assignment.exam_id, token);
       } else {
         // Fallback: Use custom protocol for production
-        window.location.href = `passport-renderer://start-exam?token=${encodeURIComponent(token)}`;
+        // window.location.href = `passport-renderer://start-exam?token=${encodeURIComponent(token)}`;
       }
     } catch (err) {
+      console.error('Exception when starting exam:', err);
       alert('Error: ' + (err as Error).message);
     } finally {
       setLoadingExamId(null);
@@ -118,13 +126,13 @@ const StudentPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {exams.map(exam => {
-                const status = getStatus(exam);
+              {assignments.map(assignment => {
+                const status = getStatus(assignment);
                 const now = new Date();
-                const available = new Date(exam.available_at);
-                const end = new Date(exam.end_at);
-                const attempts = typeof exam.attempts === 'number' ? exam.attempts : 0;
-                const maxAttempts = typeof exam.max_attempts === 'number' ? exam.max_attempts : undefined;
+                const available = new Date(assignment.available_at);
+                const end = new Date(assignment.end_at);
+                const attempts = typeof assignment.attempts === 'number' ? assignment.attempts : 0;
+                const maxAttempts = typeof assignment.max_attempts === 'number' ? assignment.max_attempts : undefined;
                 let actionContent;
                 if (now < available) {
                   actionContent = <Typography variant="body2">Exam not yet available</Typography>;
@@ -137,10 +145,10 @@ const StudentPage: React.FC = () => {
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => handleStartExam(exam.assignment_id)}
-                        disabled={loadingExamId === exam.assignment_id}
+                        onClick={() => handleStartExam(assignment)}
+                        disabled={loadingExamId === assignment.assignment_id}
                       >
-                        {loadingExamId === exam.assignment_id ? 'Starting...' : 'Start Exam'}
+                        {loadingExamId === assignment.assignment_id ? 'Starting...' : 'Start Exam'}
                       </Button>
                     );
                   } else {
@@ -148,12 +156,12 @@ const StudentPage: React.FC = () => {
                   }
                 }
                 return (
-                  <TableRow key={exam.assignment_id}>
-                    <TableCell>{exam.title || <em style={{color:'red'}}>Missing title</em>}</TableCell>
-                    <TableCell>{DateTime.fromISO(exam.available_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
-                    <TableCell>{DateTime.fromISO(exam.end_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
-                    <TableCell>{typeof exam.max_attempts === 'number' ? (exam.max_attempts === 0 ? 'Unlimited' : exam.max_attempts) : '—'}</TableCell>
-                    <TableCell>{status === 'completed' && typeof exam.score === 'number' ? exam.score : '-'}</TableCell>
+                  <TableRow key={assignment.assignment_id}>
+                    <TableCell>{assignment.title || <em style={{color:'red'}}>Missing title</em>}</TableCell>
+                    <TableCell>{DateTime.fromISO(assignment.available_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
+                    <TableCell>{DateTime.fromISO(assignment.end_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
+                    <TableCell>{typeof assignment.max_attempts === 'number' ? (assignment.max_attempts === 0 ? 'Unlimited' : assignment.max_attempts) : '—'}</TableCell>
+                    <TableCell>{status === 'completed' && typeof assignment.score === 'number' ? assignment.score : '-'}</TableCell>
                     <TableCell>{actionContent}</TableCell>
                   </TableRow>
                 );
