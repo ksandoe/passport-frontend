@@ -22,8 +22,8 @@ interface AssignExamDialogProps {
 
 const AssignExamDialog: React.FC<AssignExamDialogProps> = ({ open, onClose, onAssign, examId }) => {
   const [classId, setClassId] = React.useState('');
-  const [availableAt, setAvailableAt] = React.useState('');
-  const [endAt, setEndAt] = React.useState('');
+  const [availableAt, setAvailableAt] = React.useState<string>('');
+  const [endAt, setEndAt] = React.useState<string>('');
   const [classes, setClasses] = React.useState<ClassItem[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [fetchingClasses, setFetchingClasses] = React.useState(false);
@@ -116,7 +116,7 @@ const AssignExamDialog: React.FC<AssignExamDialogProps> = ({ open, onClose, onAs
               label="End At"
               type="datetime-local"
               fullWidth
-              value={endAt}
+              value={endAt ?? ''}
               onChange={e => setEndAt(e.target.value)}
               InputLabelProps={{ shrink: true }}
             />

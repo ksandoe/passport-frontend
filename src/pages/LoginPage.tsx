@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient.tsx';
-import { Box, Button, TextField, Typography, Paper, Link } from '@mui/material';
+import { Box, Button, TextField, Typography, Paper } from '@mui/material';
 import LoginAuditLog from '../components/LoginAuditLog';
 
 const RESEND_COOLDOWN = 30; // seconds

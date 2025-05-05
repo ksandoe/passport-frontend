@@ -59,11 +59,6 @@ const ExamsPage: React.FC = () => {
     setAssignOpen(false);
     setSelectedExam(null);
   };
-  const handleAssign = (classId: string, availableAt: string, endAt: string) => {
-    // TODO: Call backend API to assign selectedExam to classId
-    alert(`Assign exam ${selectedExam} to class ${classId} from ${availableAt} to ${endAt}`);
-    handleCloseAssign();
-  };
 
   // New Exam Dialog handlers
   const handleOpenNewExam = () => setNewExamOpen(true);
@@ -92,10 +87,6 @@ const ExamsPage: React.FC = () => {
   const handleQtiImportClose = () => {
     setQtiImportOpen(false);
     setQtiImportExamId(null);
-  };
-
-  const handleQtiImportSuccess = (result: { imported: number; errors: string[] }) => {
-    fetchExams(); // reload exams in case questions count is displayed elsewhere
   };
 
   const handleEditExam = (exam: any) => setEditExam(exam);
@@ -193,7 +184,7 @@ const ExamsPage: React.FC = () => {
           max_attempts={editExam.max_attempts}
         />
       )}
-      <QtiImportDialog open={qtiImportOpen} onClose={handleQtiImportClose} examId={qtiImportExamId || ''} onSuccess={handleQtiImportSuccess} />
+      <QtiImportDialog open={qtiImportOpen} onClose={handleQtiImportClose} examId={qtiImportExamId || ''} />
     </Box>
   );
 };

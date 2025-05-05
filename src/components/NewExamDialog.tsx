@@ -28,12 +28,12 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
   duration_minutes: initialDuration = 0, 
   max_attempts: initialMaxAttempts = 0 
 }) => {
-  const [title, setTitle] = useState(initialTitle);
-  const [instructions, setInstructions] = useState(initialInstructions);
-  const [duration, setDuration] = useState(initialDuration ? String(initialDuration) : '');
-  const [maxAttempts, setMaxAttempts] = useState(initialMaxAttempts ? String(initialMaxAttempts) : '0');
-  const [availableAt, setAvailableAt] = useState('');
-  const [endAt, setEndAt] = useState('');
+  const [title, setTitle] = useState<string>(initialTitle);
+  const [instructions, setInstructions] = useState<string>(initialInstructions);
+  const [duration, setDuration] = useState<string>(initialDuration ? String(initialDuration) : '');
+  const [maxAttempts, setMaxAttempts] = useState<string>(initialMaxAttempts ? String(initialMaxAttempts) : '0');
+  const [availableAt, setAvailableAt] = useState<string>('');
+  const [endAt, setEndAt] = useState<string>('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -65,8 +65,8 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
       return;
     }
     setError('');
-    const availableAtISO = DateTime.fromJSDate(new Date(availableAt), { zone: 'America/Los_Angeles' }).toISO();
-    const endAtISO = DateTime.fromJSDate(new Date(endAt), { zone: 'America/Los_Angeles' }).toISO();
+    const availableAtISO = availableAt ? DateTime.fromJSDate(new Date(availableAt), { zone: 'America/Los_Angeles' }).toISO() ?? '' : '';
+    const endAtISO = endAt ? DateTime.fromJSDate(new Date(endAt), { zone: 'America/Los_Angeles' }).toISO() ?? '' : '';
     onCreate({ 
       title, 
       instructions, 
@@ -141,7 +141,7 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
             label="Available Until"
             type="datetime-local"
             fullWidth
-            value={endAt}
+            value={endAt ?? ''}
             onChange={e => setEndAt(e.target.value)}
             InputLabelProps={{ shrink: true }}
           />

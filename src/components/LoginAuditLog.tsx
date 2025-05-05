@@ -41,7 +41,7 @@ const LoginAuditLog: React.FC = () => {
     setLoading(true);
     mockFetchAuditLog()
       .then(data => { if (mounted) setLog(data); })
-      .catch(err => { if (mounted) setError('Failed to load audit log'); })
+      .catch(_err => { if (mounted) setError('Failed to load audit log'); })
       .finally(() => { if (mounted) setLoading(false); });
     return () => { mounted = false; };
   }, []);

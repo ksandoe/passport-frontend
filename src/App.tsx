@@ -16,13 +16,11 @@ import SchoolIcon from '@mui/icons-material/School';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import LogoutIcon from '@mui/icons-material/Logout';
 import IconButton from '@mui/material/IconButton';
-import ExamsPage from './pages/ExamsPage';
 import AdminPage from './pages/AdminPage';
 import StudentPage from './pages/StudentPage';
 import TeacherPage from './pages/TeacherPage';
 import { supabase } from './supabaseClient';
 import LoginPage from './pages/LoginPage';
-import ClassManagementTable from './components/ClassManagementTable';
 
 const drawerWidth = 220;
 
@@ -40,11 +38,11 @@ function App() {
   const [role, setRole] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data }: any) => {
       setUser(data.user);
       setLoading(false);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_event: string, session: any) => {
       setUser(session?.user ?? null);
     });
     return () => {

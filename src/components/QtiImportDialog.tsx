@@ -2,18 +2,15 @@ import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, LinearProgress } from '@mui/material';
 import JSZip from 'jszip';
 import { XMLParser } from 'fast-xml-parser';
-import { supabase } from '../supabaseClient.tsx';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface QtiImportDialogProps {
   open: boolean;
   onClose: () => void;
   examId: string;
-  onSuccess: (result: { imported: number; errors: string[] }) => void;
+  onSuccess?: (result: { imported: number; errors: string[] }) => void;
 }
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 const QtiImportDialog: React.FC<QtiImportDialogProps> = ({ open, onClose, examId, onSuccess }) => {
   const [file, setFile] = React.useState<File | null>(null);
@@ -173,24 +170,6 @@ const QtiImportDialog: React.FC<QtiImportDialogProps> = ({ open, onClose, examId
             return typeof html === 'string' ? html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim() : html;
           }
 
-          // Utility function to get mime type from filename
-          function getMimeType(filename: string): string {
-            const ext = filename.split('.').pop()?.toLowerCase();
-            switch (ext) {
-              case 'jpg':
-              case 'jpeg':
-                return 'image/jpeg';
-              case 'png':
-                return 'image/png';
-              case 'gif':
-                return 'image/gif';
-              case 'svg':
-                return 'image/svg+xml';
-              default:
-                return 'application/octet-stream';
-            }
-          }
-
           // 2. Extract choices from response_lid/render_choice/response_label
           let responseLid = item.presentation?.response_lid;
           let rawResponseLabels: any[] = [];
@@ -320,7 +299,7 @@ const QtiImportDialog: React.FC<QtiImportDialogProps> = ({ open, onClose, examId
         }
       }
       setResult({ imported, errors });
-      onSuccess({ imported, errors });
+      if (onSuccess) onSuccess({ imported, errors });
     } catch (err: any) {
       setError(err.message || 'Failed to import QTI');
     } finally {

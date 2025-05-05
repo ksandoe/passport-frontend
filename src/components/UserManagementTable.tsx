@@ -18,7 +18,7 @@ const UserManagementTable: React.FC = () => {
         setUsers(data.users || []);
         setLoading(false);
       })
-      .catch(err => {
+      .catch(() => {
         setError('Failed to fetch users');
         setLoading(false);
       });
