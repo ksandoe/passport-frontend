@@ -133,6 +133,7 @@ const StudentPage: React.FC = () => {
                 <TableCell>Available From</TableCell>
                 <TableCell>Available Until</TableCell>
                 <TableCell>Max Attempts</TableCell>
+                <TableCell>Attempts</TableCell>
                 <TableCell>Score</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -187,7 +188,8 @@ const StudentPage: React.FC = () => {
                     <TableCell>{DateTime.fromISO(assignment.available_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
                     <TableCell>{DateTime.fromISO(assignment.end_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
                     <TableCell>{typeof assignment.max_attempts === 'number' ? (assignment.max_attempts === 0 ? 'Unlimited' : assignment.max_attempts) : '—'}</TableCell>
-                    <TableCell>{status === 'completed' && typeof assignment.score === 'number' ? assignment.score : '-'}</TableCell>
+                    <TableCell>{typeof assignment.attempts === 'number' ? assignment.attempts : 0}{typeof assignment.max_attempts === 'number' && assignment.max_attempts > 0 ? ` / ${assignment.max_attempts}` : ''}</TableCell>
+                    <TableCell>{typeof assignment.score === 'number' ? assignment.score : '-'}</TableCell>
                     <TableCell>{actionContent}</TableCell>
                   </TableRow>
                 );
