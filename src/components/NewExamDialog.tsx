@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box } from '@mui/material';
-import { DateTime } from 'luxon';
 
 interface NewExamDialogProps {
   open: boolean;
@@ -10,8 +9,6 @@ interface NewExamDialogProps {
     instructions: string; 
     duration_minutes: number; 
     max_attempts: number; 
-    available_at: string; 
-    end_at: string 
   }) => void;
   title?: string;
   instructions?: string;
@@ -32,8 +29,7 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
   const [instructions, setInstructions] = useState<string>(initialInstructions);
   const [duration, setDuration] = useState<string>(initialDuration ? String(initialDuration) : '');
   const [maxAttempts, setMaxAttempts] = useState<string>(initialMaxAttempts ? String(initialMaxAttempts) : '0');
-  const [availableAt, setAvailableAt] = useState<string>('');
-  const [endAt, setEndAt] = useState<string>('');
+
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -41,8 +37,8 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
     setInstructions(initialInstructions);
     setDuration(initialDuration ? String(initialDuration) : '');
     setMaxAttempts(initialMaxAttempts ? String(initialMaxAttempts) : '0');
-    setAvailableAt('');
-    setEndAt('');
+
+
   }, [initialTitle, initialInstructions, initialDuration, initialMaxAttempts, open]);
 
   const handleSubmit = async () => {
@@ -60,27 +56,20 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
       setError('Max attempts must be 0 or greater.');
       return;
     }
-    if (availableAt && endAt && new Date(availableAt) >= new Date(endAt)) {
-      setError('Available From date must be before Available Until date.');
-      return;
-    }
+
     setError('');
-    const availableAtISO = availableAt ? DateTime.fromJSDate(new Date(availableAt), { zone: 'America/Los_Angeles' }).toISO() ?? '' : '';
-    const endAtISO = endAt ? DateTime.fromJSDate(new Date(endAt), { zone: 'America/Los_Angeles' }).toISO() ?? '' : '';
     onCreate({ 
       title, 
       instructions, 
       duration_minutes, 
-      max_attempts, 
-      available_at: availableAtISO, 
-      end_at: endAtISO 
+      max_attempts
     });
     setTitle('');
     setInstructions('');
     setDuration('');
     setMaxAttempts('0');
-    setAvailableAt('');
-    setEndAt('');
+
+
   };
 
   const handleClose = () => {
@@ -89,8 +78,8 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
     setInstructions('');
     setDuration('');
     setMaxAttempts('0');
-    setAvailableAt('');
-    setEndAt('');
+
+
     onClose();
   };
 
@@ -127,24 +116,7 @@ const NewExamDialog: React.FC<NewExamDialogProps> = ({
             required
             inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', min: 0 }}
           />
-          <TextField
-            margin="normal"
-            label="Available From"
-            type="datetime-local"
-            fullWidth
-            value={availableAt}
-            onChange={e => setAvailableAt(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            margin="normal"
-            label="Available Until"
-            type="datetime-local"
-            fullWidth
-            value={endAt ?? ''}
-            onChange={e => setEndAt(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
+
           {error && <Box color="error.main">{error}</Box>}
         </Box>
       </DialogContent>

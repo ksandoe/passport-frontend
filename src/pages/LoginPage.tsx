@@ -136,8 +136,8 @@ const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" sx={{ background: 'linear-gradient(120deg, #2196f3 0%, #21cbf3 100%)' }}>
-      <Paper elevation={6} sx={{ p: 5, minWidth: 350, borderRadius: 4, boxShadow: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" width="100vw" sx={{ background: 'linear-gradient(120deg, #2196f3 0%, #21cbf3 100%)' }}>
+      <Paper elevation={6} sx={{ p: 5, minWidth: 350, maxWidth: 400, width: '100%', borderRadius: 4, boxShadow: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* Logo placeholder - replace src with your logo file if available */}
         <Box mb={2}>
           <img src="/passport-logo.png" alt="Passport ExamLock Logo" style={{ width: 64, height: 64, borderRadius: 8, boxShadow: '0 2px 8px #2196f399' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
