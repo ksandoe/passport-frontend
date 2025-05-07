@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient.tsx';
 import { Box, Button, TextField, Typography, Paper } from '@mui/material';
-import LoginAuditLog from '../components/LoginAuditLog';
 
 const RESEND_COOLDOWN = 30; // seconds
 const LOCKOUT_ATTEMPTS = 5;
@@ -137,9 +136,18 @@ const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-      <Paper sx={{ p: 4, minWidth: 300 }}>
-        <Typography variant="h5" mb={2}>Sign In</Typography>
+    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" sx={{ background: 'linear-gradient(120deg, #2196f3 0%, #21cbf3 100%)' }}>
+      <Paper elevation={6} sx={{ p: 5, minWidth: 350, borderRadius: 4, boxShadow: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {/* Logo placeholder - replace src with your logo file if available */}
+        <Box mb={2}>
+          <img src="/passport-logo.png" alt="Passport ExamLock Logo" style={{ width: 64, height: 64, borderRadius: 8, boxShadow: '0 2px 8px #2196f399' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        </Box>
+        <Typography variant="h4" fontWeight={700} color="primary" mb={1} letterSpacing={1} sx={{ textShadow: '0 2px 8px #21cbf355' }}>
+          Passport ExamLock
+        </Typography>
+        <Typography variant="subtitle1" color="text.secondary" mb={3}>
+          Secure Exam Login
+        </Typography>
         {step === 'email' && (
           <form onSubmit={handleSendCode}>
             <TextField
@@ -207,7 +215,7 @@ const LoginPage: React.FC<{ onLogin: () => void }> = ({ onLogin }) => {
           </form>
         )}
       </Paper>
-      <LoginAuditLog />
+
     </Box>
   );
 };
