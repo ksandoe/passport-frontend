@@ -58,10 +58,22 @@ const StudentPage: React.FC = () => {
     const now = new Date();
     const available = new Date(assignment.available_at);
     const end = new Date(assignment.end_at);
+    const attempts = assignment.attempts ?? 0;
+    const maxAttempts = assignment.max_attempts ?? 0;
     if (now < available) return 'upcoming';
-    if (now >= available && now <= end) return 'active';
+    if (now >= available && now <= end) {
+      // Check attempt limits
+      if (
+        maxAttempts > 0 &&
+        attempts >= maxAttempts
+      ) {
+        return 'exhausted';
+      }
+      return 'active';
+    }
     return 'completed';
   };
+
 
   const handleStartExam = async (assignment: Assignment) => {
     setLoadingExamId(assignment.assignment_id);
@@ -142,14 +154,28 @@ const StudentPage: React.FC = () => {
                   // In available window
                   if (maxAttempts === 0 || attempts < (maxAttempts ?? 1)) {
                     actionContent = (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleStartExam(assignment)}
-                        disabled={loadingExamId === assignment.assignment_id}
-                      >
-                        {loadingExamId === assignment.assignment_id ? 'Starting...' : 'Start Exam'}
-                      </Button>
+                      <div>
+                        {status === 'exhausted' ? (
+                          <div style={{ color: 'red', fontWeight: 'bold' }}>
+                            You have used all allowed attempts for this exam.
+                          </div>
+                        ) : (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleStartExam(assignment)}
+                            disabled={status !== 'active'}
+                          >
+                            Start Exam
+                          </Button>
+                        )}
+                        <div>
+                          Attempts: {(assignment.attempts ?? 0)}
+                          {(assignment.max_attempts ?? 0) > 0
+                            ? ` / ${(assignment.max_attempts ?? 0)}`
+                            : ' (unlimited)'}
+                        </div>
+                      </div>
                     );
                   } else {
                     actionContent = <Typography variant="body2">No more attempts</Typography>;
