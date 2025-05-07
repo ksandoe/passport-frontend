@@ -33,7 +33,7 @@ const StudentPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const [loadingExamId, setLoadingExamId] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (!user) return;
@@ -76,7 +76,7 @@ const StudentPage: React.FC = () => {
 
 
   const handleStartExam = async (assignment: Assignment) => {
-    setLoadingExamId(assignment.assignment_id);
+
     try {
       console.log('Attempting to start exam with:', { userId: user.id, examId: assignment.exam_id, assignmentId: assignment.assignment_id });
       const res = await fetch(`${API_BASE_URL}/api/exam/session`, {
@@ -93,7 +93,7 @@ const StudentPage: React.FC = () => {
       if (!res.ok) {
         console.error('Failed to get exam token:', data);
         alert(data.error || 'Failed to get exam token');
-        setLoadingExamId(null);
+
         return;
       }
       const token = data.token;
@@ -112,7 +112,7 @@ const StudentPage: React.FC = () => {
       console.error('Exception when starting exam:', err);
       alert('Error: ' + (err as Error).message);
     } finally {
-      setLoadingExamId(null);
+
     }
   };
 
