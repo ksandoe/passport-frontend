@@ -24,6 +24,9 @@ const AssignExamDialog: React.FC<AssignExamDialogProps> = ({ open, onClose, onAs
   const [classId, setClassId] = React.useState('');
   const [availableAt, setAvailableAt] = React.useState<string>('');
   const [endAt, setEndAt] = React.useState<string>('');
+  const [maxAttempts, setMaxAttempts] = React.useState<number>(0);
+  const [scoringMethod, setScoringMethod] = React.useState<'best' | 'last' | 'average'>('best');
+  const [durationMinutes, setDurationMinutes] = React.useState<number>(60);
   const [classes, setClasses] = React.useState<ClassItem[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [fetchingClasses, setFetchingClasses] = React.useState(false);
@@ -40,13 +43,13 @@ const AssignExamDialog: React.FC<AssignExamDialogProps> = ({ open, onClose, onAs
   }, [open]);
 
   const handleAssign = async () => {
-    if (!classId || !examId || !availableAt || !endAt) return;
+    if (!classId || !examId || !availableAt || !endAt || !scoringMethod || !durationMinutes) return;
     setLoading(true);
     setError(null);
     try {
       // Convert local picker values to America/Los_Angeles ISO
-      const availableAtISO = DateTime.fromJSDate(new Date(availableAt), { zone: 'America/Los_Angeles' }).toISO();
-      const endAtISO = DateTime.fromJSDate(new Date(endAt), { zone: 'America/Los_Angeles' }).toISO();
+      const availableFromISO = DateTime.fromJSDate(new Date(availableAt), { zone: 'America/Los_Angeles' }).toISO();
+      const availableUntilISO = DateTime.fromJSDate(new Date(endAt), { zone: 'America/Los_Angeles' }).toISO();
       // 1. Fetch all students in the class
       const res = await axios.get(`${API_BASE_URL}/classes/${classId}/students`);
       const students = res.data.students || [];
@@ -57,10 +60,13 @@ const AssignExamDialog: React.FC<AssignExamDialogProps> = ({ open, onClose, onAs
           axios.post(`${API_BASE_URL}/assignments`, {
             user_id: student.user_id,
             exam_id: examId,
-            available_at: availableAtISO,
-            end_at: endAtISO,
+            available_from: availableFromISO,
+            available_until: availableUntilISO,
             status: 'assigned',
-            attempts: 0
+            attempts: 0,
+            max_attempts: maxAttempts,
+            scoring_method: scoringMethod,
+            duration_minutes: durationMinutes
           })
         )
       );
@@ -120,12 +126,43 @@ const AssignExamDialog: React.FC<AssignExamDialogProps> = ({ open, onClose, onAs
               onChange={e => setEndAt(e.target.value)}
               InputLabelProps={{ shrink: true }}
             />
+            <TextField
+              margin="normal"
+              label="Max Attempts (0 = Unlimited)"
+              type="number"
+              fullWidth
+              value={maxAttempts}
+              onChange={e => setMaxAttempts(Number(e.target.value))}
+              InputProps={{ inputProps: { min: 0 } }}
+            />
+            <FormControl fullWidth margin="normal">
+              <InputLabel id="scoring-method-label">Scoring Method</InputLabel>
+              <Select
+                labelId="scoring-method-label"
+                value={scoringMethod}
+                label="Scoring Method"
+                onChange={e => setScoringMethod(e.target.value as 'best' | 'last' | 'average')}
+              >
+                <MenuItem value="best">Best</MenuItem>
+                <MenuItem value="last">Last</MenuItem>
+                <MenuItem value="average">Average</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              margin="normal"
+              label="Duration (minutes)"
+              type="number"
+              fullWidth
+              value={durationMinutes}
+              onChange={e => setDurationMinutes(Number(e.target.value))}
+              InputProps={{ inputProps: { min: 1 } }}
+            />
           </>
         )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleAssign} disabled={!classId || !availableAt || !endAt || loading}>
+        <Button variant="contained" onClick={handleAssign} disabled={!classId || !availableAt || !endAt || !scoringMethod || !durationMinutes || loading}>
           {loading ? <CircularProgress size={24} /> : 'Assign'}
         </Button>
       </DialogActions>
