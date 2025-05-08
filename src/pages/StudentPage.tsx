@@ -100,7 +100,7 @@ const StudentPage: React.FC = () => {
         alert(data.error || 'Failed to start exam');
         return;
       }
-      const { token, attempt_id } = data;
+      const { token } = data;
       // Launch the Electron renderer with the token
       if (window.electronAPI && window.electronAPI.launchExam) {
         window.electronAPI.launchExam(user.id, assignment.exam_id, token);
