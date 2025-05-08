@@ -9,13 +9,17 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 interface Assignment {
   assignment_id: string;
   exam_id: string;
+  user_id: string;
   title: string;
-  available_at: string;
-  end_at: string;
-  status: 'upcoming' | 'active' | 'completed';
+  instructions?: string;
+  assigned_at: string;
+  available_from: string;
+  available_until: string;
+  status: 'upcoming' | 'active' | 'completed' | string;
   score?: number;
   max_attempts?: number;
   attempts?: number;
+  scoring_method?: string;
 }
 
 // Add Electron API typing for TypeScript
@@ -56,8 +60,8 @@ const StudentPage: React.FC = () => {
 
   const getStatus = (assignment: Assignment) => {
     const now = new Date();
-    const available = new Date(assignment.available_at);
-    const end = new Date(assignment.end_at);
+    const available = new Date(assignment.available_from);
+    const end = new Date(assignment.available_until);
     const attempts = assignment.attempts ?? 0;
     const maxAttempts = assignment.max_attempts ?? 0;
     if (now < available) return 'upcoming';
@@ -76,43 +80,39 @@ const StudentPage: React.FC = () => {
 
 
   const handleStartExam = async (assignment: Assignment) => {
-
+    if (!user) return;
+    setLoading(true);
+    setError(null);
     try {
-      console.log('Attempting to start exam with:', { userId: user.id, examId: assignment.exam_id, assignmentId: assignment.assignment_id });
-      const res = await fetch(`${API_BASE_URL}/api/exam/session`, {
+      // Optionally collect device info
+      const device_info = navigator.userAgent;
+      const res = await fetch(`${API_BASE_URL}/assignments/${assignment.assignment_id}/start-attempt`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: user.id,
-          exam_id: assignment.exam_id,
+          device_info,
         }),
       });
       const data = await res.json();
-      console.log('API response:', res);
-      console.log('API response data:', data);
       if (!res.ok) {
-        console.error('Failed to get exam token:', data);
-        alert(data.error || 'Failed to get exam token');
-
+        setError(data.error || 'Failed to start exam');
+        alert(data.error || 'Failed to start exam');
         return;
       }
-      const token = data.token;
-
+      const { token, attempt_id } = data;
       // Launch the Electron renderer with the token
-      window.location.href = `passport://start?token=${encodeURIComponent(token)}`;
-
-      // Launch the renderer with the token
       if (window.electronAPI && window.electronAPI.launchExam) {
         window.electronAPI.launchExam(user.id, assignment.exam_id, token);
       } else {
         // Fallback: Use custom protocol for production
-        // window.location.href = `passport-renderer://start-exam?token=${encodeURIComponent(token)}`;
+        window.location.href = `passport://start?token=${encodeURIComponent(token)}`;
       }
     } catch (err) {
-      console.error('Exception when starting exam:', err);
+      setError((err as Error).message);
       alert('Error: ' + (err as Error).message);
     } finally {
-
+      setLoading(false);
     }
   };
 
@@ -142,8 +142,8 @@ const StudentPage: React.FC = () => {
               {assignments.map(assignment => {
                 const status = getStatus(assignment);
                 const now = new Date();
-                const available = new Date(assignment.available_at);
-                const end = new Date(assignment.end_at);
+                const available = new Date(assignment.available_from);
+                const end = new Date(assignment.available_until);
                 const attempts = typeof assignment.attempts === 'number' ? assignment.attempts : 0;
                 const maxAttempts = typeof assignment.max_attempts === 'number' ? assignment.max_attempts : undefined;
                 let actionContent;
@@ -185,8 +185,8 @@ const StudentPage: React.FC = () => {
                 return (
                   <TableRow key={assignment.assignment_id}>
                     <TableCell>{assignment.title || <em style={{color:'red'}}>Missing title</em>}</TableCell>
-                    <TableCell>{DateTime.fromISO(assignment.available_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
-                    <TableCell>{DateTime.fromISO(assignment.end_at).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
+                    <TableCell>{DateTime.fromISO(assignment.available_from).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
+                    <TableCell>{DateTime.fromISO(assignment.available_until).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
                     <TableCell>{typeof assignment.max_attempts === 'number' ? (assignment.max_attempts === 0 ? 'Unlimited' : assignment.max_attempts) : '—'}</TableCell>
                     <TableCell>{typeof assignment.attempts === 'number' ? assignment.attempts : 0}{typeof assignment.max_attempts === 'number' && assignment.max_attempts > 0 ? ` / ${assignment.max_attempts}` : ''}</TableCell>
                     <TableCell>{typeof assignment.score === 'number' ? assignment.score : '-'}</TableCell>
