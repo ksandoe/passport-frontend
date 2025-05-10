@@ -1,7 +1,6 @@
 import React from 'react';
-import { Box, Typography, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Typography, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AssignExamDialog from '../components/AssignExamDialog';
 import NewExamDialog from '../components/NewExamDialog';
 import QtiImportDialog from '../components/QtiImportDialog';
@@ -133,8 +132,7 @@ const ExamsPage: React.FC = () => {
             <TableRow>
               <TableCell>Title</TableCell>
               <TableCell>Instructions</TableCell>
-              <TableCell>Duration (min)</TableCell>
-              <TableCell>Max Attempts</TableCell>
+
               <TableCell>Created At</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
@@ -147,15 +145,18 @@ const ExamsPage: React.FC = () => {
                 <TableRow key={exam.exam_id}>
                   <TableCell>{exam.title}</TableCell>
                   <TableCell>{exam.instructions}</TableCell>
-                  <TableCell>{exam.duration_minutes}</TableCell>
-                  <TableCell>{typeof exam.max_attempts === 'number' ? (exam.max_attempts === 0 ? 'Unlimited' : exam.max_attempts ?? '—') : '—'}</TableCell>
+
                   <TableCell>{exam.created_at ? new Date(exam.created_at).toLocaleString() : '—'}</TableCell>
                   <TableCell>
                     <Button size="small" onClick={() => handleEditExam(exam)}>Edit</Button>
                     <Button size="small" color="error" onClick={() => handleDeleteExam(exam.exam_id)}>Delete</Button>
-                    <Button size="small" color="primary" startIcon={<AssignmentIndIcon />} onClick={() => handleOpenAssign(exam.exam_id)}>
-                      Assign
-                    </Button>
+                    {exam.assignment_count > 0 ? (
+                      <Chip label="ASSIGNED" color="success" size="small" style={{ fontWeight: 700, letterSpacing: 1 }} />
+                    ) : (
+                      <Button size="small" color="primary" style={{ fontWeight: 700, letterSpacing: 1 }} onClick={() => handleOpenAssign(exam.exam_id)}>
+                        ASSIGN
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

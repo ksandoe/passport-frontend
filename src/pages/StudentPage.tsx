@@ -20,6 +20,7 @@ interface Assignment {
   max_attempts?: number;
   attempts?: number;
   scoring_method?: string;
+  duration_minutes?: number;
 }
 
 // Add Electron API typing for TypeScript
@@ -86,11 +87,13 @@ const StudentPage: React.FC = () => {
     try {
       // Optionally collect device info
       const device_info = navigator.userAgent;
-      const res = await fetch(`${API_BASE_URL}/assignments/${assignment.assignment_id}/start-attempt`, {
+      const res = await fetch(`${API_BASE_URL}/api/exam/session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: user.id,
+          assignment_id: assignment.assignment_id,
+          exam_id: assignment.exam_id,
           device_info,
         }),
       });
@@ -132,6 +135,7 @@ const StudentPage: React.FC = () => {
                 <TableCell>Exam Title</TableCell>
                 <TableCell>Available From</TableCell>
                 <TableCell>Available Until</TableCell>
+                <TableCell>Duration</TableCell>
                 <TableCell>Max Attempts</TableCell>
                 <TableCell>Attempts</TableCell>
                 <TableCell>Score</TableCell>
@@ -170,12 +174,6 @@ const StudentPage: React.FC = () => {
                             Start Exam
                           </Button>
                         )}
-                        <div>
-                          Attempts: {(assignment.attempts ?? 0)}
-                          {(assignment.max_attempts ?? 0) > 0
-                            ? ` / ${(assignment.max_attempts ?? 0)}`
-                            : ' (unlimited)'}
-                        </div>
                       </div>
                     );
                   } else {
@@ -187,6 +185,7 @@ const StudentPage: React.FC = () => {
                     <TableCell>{assignment.title || <em style={{color:'red'}}>Missing title</em>}</TableCell>
                     <TableCell>{DateTime.fromISO(assignment.available_from).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
                     <TableCell>{DateTime.fromISO(assignment.available_until).setZone('America/Los_Angeles').toLocaleString(DateTime.DATETIME_MED)}</TableCell>
+                    <TableCell>{typeof assignment.duration_minutes === 'number' && assignment.duration_minutes > 0 ? `${assignment.duration_minutes} min` : '—'}</TableCell>
                     <TableCell>{typeof assignment.max_attempts === 'number' ? (assignment.max_attempts === 0 ? 'Unlimited' : assignment.max_attempts) : '—'}</TableCell>
                     <TableCell>{typeof assignment.attempts === 'number' ? assignment.attempts : 0}{typeof assignment.max_attempts === 'number' && assignment.max_attempts > 0 ? ` / ${assignment.max_attempts}` : ''}</TableCell>
                     <TableCell>{typeof assignment.score === 'number' ? assignment.score : '-'}</TableCell>
