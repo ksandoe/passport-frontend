@@ -62,7 +62,7 @@ const ExamsPage: React.FC = () => {
   // New Exam Dialog handlers
   const handleOpenNewExam = () => setNewExamOpen(true);
   const handleCloseNewExam = () => setNewExamOpen(false);
-  const handleCreateExam = async (exam: { title: string; instructions: string; duration_minutes: number; max_attempts: number }) => {
+  const handleCreateExam = async (exam: { title: string; instructions: string }) => {
     if (!currentUserId) return;
     setLoading(true);
     setError('');
@@ -90,7 +90,7 @@ const ExamsPage: React.FC = () => {
 
   const handleEditExam = (exam: any) => setEditExam(exam);
   const handleCloseEditExam = () => setEditExam(null);
-  const handleUpdateExam = async (updatedExam: { title: string; instructions: string; duration_minutes: number; max_attempts: number }) => {
+  const handleUpdateExam = async (updatedExam: { title: string; instructions: string }) => {
     if (!currentUserId || !editExam) return;
     setLoading(true);
     setError('');
@@ -181,8 +181,6 @@ const ExamsPage: React.FC = () => {
           onCreate={handleUpdateExam}
           title={editExam.title}
           instructions={editExam.instructions}
-          duration_minutes={editExam.duration_minutes}
-          max_attempts={editExam.max_attempts}
         />
       )}
       <QtiImportDialog open={qtiImportOpen} onClose={handleQtiImportClose} examId={qtiImportExamId || ''} />
