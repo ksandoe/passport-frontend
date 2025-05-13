@@ -202,13 +202,13 @@ const StudentPage: React.FC = () => {
       <Typography variant="h5" gutterBottom>Download Exam Browser</Typography>
       <Typography gutterBottom>
         To take secure exams, you must use the Passport ExamLock browser. Please download and install the version for your operating system below. <br />
-        <b>Note:</b> The installers are delivered as <b>ZIP files</b> due to their size. After downloading, unzip and run the installer. If you have any issues, contact your instructor or administrator.
+        <b>Note:</b> The Windows installer is delivered as a <b>ZIP file</b> due to its size. After downloading, unzip and run the installer. For macOS, the installer is delivered as a <b>DMG file</b>. If you have any issues, contact your instructor or administrator.
       </Typography>
       <Box display="flex" gap={2} mt={2}>
         <Button
           variant="contained"
           color="primary"
-          href="https://drive.google.com/your-windows-zip-link"
+          href="https://drive.google.com/file/d/12Pg6vAbwm92zmc7q_hqxy7DHlj684qP6/view?usp=drive_link"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -217,7 +217,7 @@ const StudentPage: React.FC = () => {
         <Button
           variant="contained"
           color="secondary"
-          href="https://drive.google.com/your-macos-zip-link"
+          href="https://drive.google.com/file/d/1bjM49ks6a_B3X8xfVrCHKXPa_bWJ4ETs/view?usp=drive_link"
           target="_blank"
           rel="noopener noreferrer"
         >
