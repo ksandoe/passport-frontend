@@ -217,7 +217,7 @@ const StudentPage: React.FC = () => {
         <Button
           variant="contained"
           color="secondary"
-          href="https://drive.google.com/drive/folders/1f4zyJtL-ct5vhA7TQLkGaOspaWv3KzEC?usp=drive_link"
+          href="https://drive.google.com/file/d/1amq4VAQ247rzla9xOMvvuuCxJT4LKsxL/view?usp=drive_link"
           target="_blank"
           rel="noopener noreferrer"
         >
