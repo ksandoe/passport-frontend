@@ -50,29 +50,19 @@ const AssignExamDialog: React.FC<AssignExamDialogProps> = ({ open, onClose, onAs
       // Convert local picker values to America/Los_Angeles ISO
       const availableFromISO = DateTime.fromJSDate(new Date(availableAt), { zone: 'America/Los_Angeles' }).toISO();
       const availableUntilISO = DateTime.fromJSDate(new Date(endAt), { zone: 'America/Los_Angeles' }).toISO();
-      // 1. Fetch all students in the class
-      const res = await axios.get(`${API_BASE_URL}/classes/${classId}/students`);
-      const students = res.data.students || [];
-      if (!students.length) throw new Error('No students found in class');
-      // 2. Assign exam to each student
-      const assignResults = await Promise.allSettled(
-        students.map((student: any) =>
-          axios.post(`${API_BASE_URL}/assignments`, {
-            user_id: student.user_id,
-            exam_id: examId,
-            available_from: availableFromISO,
-            available_until: availableUntilISO,
-            status: 'assigned',
-            attempts: 0,
-            max_attempts: maxAttempts,
-            scoring_method: scoringMethod,
-            duration_minutes: durationMinutes
-          })
-        )
-      );
-      const failed = assignResults.filter(r => r.status === 'rejected');
-      if (failed.length === students.length) {
-        setError('Failed to assign exam to all students');
+      // Batch assign via backend
+      const response = await axios.post(`${API_BASE_URL}/assignments/batch`, {
+        class_id: classId,
+        exam_id: examId,
+        available_from: availableFromISO,
+        available_until: availableUntilISO,
+        status: 'assigned',
+        max_attempts: maxAttempts,
+        scoring_method: scoringMethod,
+        duration_minutes: durationMinutes
+      });
+      if (response.status !== 201) {
+        setError('Failed to assign exam to class');
         onAssign(false);
       } else {
         onAssign(true);
